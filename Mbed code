@@ -218,6 +218,7 @@ double *koeficijenti(int T) //funkcija za unos koeficijenata -> vraca niz sa koe
      ispisPoloviTekst();
      nizPolova = koeficijenti(1);
      
+     //Ne ispisuje niz kako treba, izostavlja koeficijente
      printf("Koeficijenti brojnika: \n");
      for(int i = 0; i < StepenBrojnika; i++)
         printf("%.1f\n", nizNula[i]);
