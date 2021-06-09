@@ -1,7 +1,11 @@
 #include "mbed.h"
  #include "stm32f413h_discovery_ts.h"
  #include "stm32f413h_discovery_lcd.h"
+ 
  TS_StateTypeDef TS_State = { 0 };
+ double *nizNula = NULL, *nizPolova = NULL;
+ int StepenBrojnika, StepenNazivnika;
+ 
 int dajCifru(int x1, int y1);
 void crtajTastaturu();
 
@@ -26,7 +30,9 @@ int StepenBrojnikaIliNazivnika(bool T) {//Stepen polinoma u brojniku ili nazivni
          BSP_TS_GetState(&TS_State);
          if(TS_State.touchDetected) {
             uint16_t x1 = TS_State.touchX[0];
+            wait_ms(200);
             uint16_t y1 = TS_State.touchY[0];
+            wait_ms(200);
             if(dajCifru(x1, y1) >= 0 && dajCifru(x1, y1) <= 5) { //Stepen pripada [0, 5]
                 stepen = dajCifru(x1, y1);
                 cifra[0] = stepen + 48;
@@ -131,18 +137,71 @@ int StepenBrojnikaIliNazivnika(bool T) {//Stepen polinoma u brojniku ili nazivni
      return broj;
  }
  
- double dajBroj(int *digit) //unos max 3 cifre, u formatu _ _._
+ double dajBroj(int digit[]) //unos max 3 cifre, u formatu _ _._
 {
     double ret;
     ret = digit[0] * 10 + digit[1] + digit[2] * 0.1;
     return ret;
 }
 
- double nizNula[5];
- double nizPolova[5];
- int unoseniBroj[3];
- int brojac = 0, predznak = 1, vrtiUnos = 0;
- double coef;
+int vratiStepen(int i)
+{
+    switch(i)
+    {
+        case 0: return StepenBrojnika;
+        case 1: return StepenNazivnika;
+    }
+    return 0;
+}
+
+double *koeficijenti(int T) //funkcija za unos koeficijenata -> vraca niz sa koeficijentima
+{
+    double ret[5];
+    int unoseniBroj[3];
+    int brojac = 0, i = 0, predznak = 1;
+    int stepen = vratiStepen(T);
+    double coef;
+    BSP_TS_GetState(&TS_State);
+    while (brojac < stepen) 
+    {
+        BSP_TS_GetState(&TS_State);
+        i = 0;
+        while(i < 3)
+        {
+            BSP_TS_GetState(&TS_State);
+            if(TS_State.touchDetected)
+            {
+                uint16_t x1 = TS_State.touchX[0];
+                wait_ms(200);
+                uint16_t y1 = TS_State.touchY[0];
+                wait_ms(200);
+                if(x1 >= 5 && x1 <= 30 && y1 >= 215 && y1 <= 240) //unos -
+                {
+                    predznak = -1;
+                    i--;
+                }
+                else
+                {
+                    int cifra = dajCifru(x1, y1);
+                    unoseniBroj[i] = cifra;
+                }
+                i++;
+            }
+        }
+        printf("Predznak: %d\n", predznak);
+        coef = dajBroj(unoseniBroj);
+        ret[brojac] = coef * predznak;
+         printf("%.1f\n", ret[brojac]);
+        predznak = 1;
+        brojac++;
+    }
+    printf("\n");
+    for(int i = 0; i < stepen; i++)
+        printf("%.1f\n", ret[i]);
+    return ret;
+}
+
+
  int main()
  {
      BSP_LCD_Init();
@@ -151,38 +210,20 @@ int StepenBrojnikaIliNazivnika(bool T) {//Stepen polinoma u brojniku ili nazivni
          printf("BSP_TS_Init error\\n");}
      /* brisi ekran */
      BSP_LCD_Clear(LCD_COLOR_WHITE);
-     int StepenBrojnika, StepenNazivnika;
      StepenBrojnika = StepenBrojnikaIliNazivnika(0);
      StepenNazivnika = StepenBrojnikaIliNazivnika(1);
      ispisNuleTekst();
      crtajTastaturu();
-     while(1)
-     {
-         while (brojac < 5) //max broj koefcijenata je 5
-         {
-             BSP_TS_GetState(&TS_State);//vraca poziciju touch screen-a
-             while(vrtiUnos < 3)
-             {
-                uint16_t x1 = TS_State.touchX[0];
-                wait_ms(200);
-                uint16_t y1 = TS_State.touchY[0];
-                if(x1 >= 5 && x1 <= 30 && y1 >= 215 && y1 <= 240) //unos -
-                    predznak = -1;
-                else
-                    unoseniBroj[vrtiUnos] = dajCifru(x1, y1);
-                vrtiUnos++;
-             }
-         
-                coef = dajBroj(unoseniBroj);
-                printf("%.1f\n", coef);
-                nizNula[brojac] = coef * predznak;
-                predznak = 1;
-               // printf("%d\n", nizNula[brojac]);
-                brojac++;
-         }
-     }
-         
-         brojac = 0;
-         printf("Ponovo\n");
-         wait(1);
-     }
+     nizNula = koeficijenti(0);
+     ispisPoloviTekst();
+     nizPolova = koeficijenti(1);
+     
+     printf("Koeficijenti brojnika: \n");
+     for(int i = 0; i < StepenBrojnika; i++)
+        printf("%.1f\n", nizNula[i]);
+     printf("Koeficijenti nazivnika: \n");
+     for(int i = 0; i < StepenNazivnika; i++)
+        printf("%.1f\n", nizPolova[i]);
+    printf("\n\n\n\n\n\n\n\n\n");
+     wait(1);
+ }
