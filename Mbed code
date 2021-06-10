@@ -1,7 +1,7 @@
 #include "mbed.h"
  #include "stm32f413h_discovery_ts.h"
  #include "stm32f413h_discovery_lcd.h"
- #include <iostream>
+ //#include <iostream>
  #include <vector>
  
  TS_StateTypeDef TS_State = { 0 };
@@ -26,8 +26,6 @@ void IspisZaStepenBrojnikaINazivnika(bool T) { //Od T zavisi je li brojnik ili n
      BSP_LCD_DisplayStringAt(0, 23, (uint8_t *)"(unos potvrdite sa ENTER): ", LEFT_MODE);
      BSP_LCD_DrawRect(BSP_LCD_GetXSize()/2 - 12, 80, 19, 29);
      crtajTastaturu();
-     
-     
 }
 
 void CrtajOkvirove(bool T) { //Crta okvir, tacnije mjesta predvidjena za cifre
@@ -74,7 +72,6 @@ int StepenBrojnikaIliNazivnika(bool T) {//Stepen polinoma u brojniku ili nazivni
          wait_ms(100);
      }
 }
-
 
  void ispisNuleTekst()//unesite koeficijente za nule
  {
@@ -198,13 +195,13 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
         
         CrtajOkvirove(T);
         BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
-        BSP_LCD_SetFont(&Font12);
-        if(brojac == 0) BSP_LCD_DisplayStringAt(0, 45, (uint8_t *)"Slobodni koeficijent: ", LEFT_MODE);
+        BSP_LCD_SetFont(&Font16);
+        if(brojac == 0) BSP_LCD_DisplayStringAt(0, 55, (uint8_t *)"Slobodni koeficijent: ", LEFT_MODE);
         else {
             char potencija[2] = {brojac + 48};
-            BSP_LCD_DisplayStringAt(0, 45, (uint8_t *)"Koeficijent uz s :       ", LEFT_MODE);
-            BSP_LCD_SetFont(&Font8);
-            BSP_LCD_DisplayStringAt(114, 42, (uint8_t *)potencija, LEFT_MODE);
+            BSP_LCD_DisplayStringAt(0, 55, (uint8_t *)"Koeficijent uz s :       ", LEFT_MODE);
+            BSP_LCD_SetFont(&Font12);
+            BSP_LCD_DisplayStringAt(175, 52, (uint8_t *)potencija, LEFT_MODE);
         }
         
         BSP_TS_GetState(&TS_State);
@@ -238,7 +235,7 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                     switch(i) { //Ispis cifre na predvidjeno mjesto
                         case 0: BSP_LCD_DisplayStringAt(85, 88, (uint8_t *)dega, LEFT_MODE); break;
                         case 1: BSP_LCD_DisplayStringAt(109, 88, (uint8_t *)dega, LEFT_MODE); break;
-                        case 2: BSP_LCD_DisplayStringAt(138, 90, (uint8_t *)dega, LEFT_MODE);
+                        case 2: BSP_LCD_DisplayStringAt(138, 88, (uint8_t *)dega, LEFT_MODE);
                         wait_ms(50);
                         break;
                             
@@ -283,7 +280,6 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
      ispisPoloviTekst();
      nizPolova = koeficijenti(1);
      
-     //Ne ispisuje niz kako treba, izostavlja koeficijente
      printf("Koeficijenti brojnika: \n");
      for(int i = 0; i < StepenBrojnika; i++)
         printf("%.1f\n", nizNula[i]);
