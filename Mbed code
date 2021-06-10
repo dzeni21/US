@@ -36,14 +36,14 @@ void CrtajOkvirove(bool T) { //Crta okvir, tacnije mjesta predvidjena za cifre
     crtajTastaturu();//
     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
     BSP_LCD_SetFont(&Font12);
-    BSP_LCD_DisplayStringAt(a + 7, 90, (uint8_t *)"-", LEFT_MODE);
-    BSP_LCD_DisplayStringAt(a + 31, 90, (uint8_t *)"-", LEFT_MODE);
-    BSP_LCD_DisplayStringAt(a + 60, 90, (uint8_t *)"-", LEFT_MODE);
+    BSP_LCD_DisplayStringAt(a + 7, 105, (uint8_t *)"-", LEFT_MODE);
+    BSP_LCD_DisplayStringAt(a + 31, 105, (uint8_t *)"-", LEFT_MODE);
+    BSP_LCD_DisplayStringAt(a + 60, 105, (uint8_t *)"-", LEFT_MODE);
    // BSP_LCD_DrawRect(a - 24, 91, 19, 9);
-    BSP_LCD_DrawRect(a, 80, 19, 29);
-    BSP_LCD_DrawRect(a + 24, 80, 19, 29);
-    BSP_LCD_FillCircle(a + 48, 106, 2);
-    BSP_LCD_DrawRect(a + 53, 80, 19, 29);
+    BSP_LCD_DrawRect(a, 95, 19, 29);
+    BSP_LCD_DrawRect(a + 24, 95, 19, 29);
+    BSP_LCD_FillCircle(a + 48, 121, 2);
+    BSP_LCD_DrawRect(a + 53, 95, 19, 29);
     
 }
 
@@ -58,7 +58,7 @@ int StepenBrojnikaIliNazivnika(bool T) {//Stepen polinoma u brojniku ili nazivni
             uint16_t x1 = TS_State.touchX[0];
             wait_ms(200);
             uint16_t y1 = TS_State.touchY[0];
-            wait_ms(200);
+            //wait_ms(200);
             if(dajCifru(x1, y1) >= 0 && dajCifru(x1, y1) <= 5) { //Stepen pripada [0, 5]
                 stepen = dajCifru(x1, y1);
                 cifra[0] = stepen + 48;
@@ -219,7 +219,7 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                 if(x1 >= 5 && x1 <= 30 && y1 >= 215 && y1 <= 240) //unos -
                 {   
                     BSP_LCD_SetFont(&Font12);
-                    BSP_LCD_DisplayStringAt(70, 90, (uint8_t *)"-", LEFT_MODE);//ispisi minus na displej
+                    BSP_LCD_DisplayStringAt(70, 105, (uint8_t *)"-", LEFT_MODE);//ispisi minus na displej
                     
                     predznak = -1;
                     i--;
@@ -233,9 +233,9 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                     
                     BSP_LCD_SetFont(&Font16);
                     switch(i) { //Ispis cifre na predvidjeno mjesto
-                        case 0: BSP_LCD_DisplayStringAt(85, 88, (uint8_t *)dega, LEFT_MODE); break;
-                        case 1: BSP_LCD_DisplayStringAt(109, 88, (uint8_t *)dega, LEFT_MODE); break;
-                        case 2: BSP_LCD_DisplayStringAt(138, 88, (uint8_t *)dega, LEFT_MODE);
+                        case 0: BSP_LCD_DisplayStringAt(85, 103, (uint8_t *)dega, LEFT_MODE); break;
+                        case 1: BSP_LCD_DisplayStringAt(109, 103, (uint8_t *)dega, LEFT_MODE); break;
+                        case 2: BSP_LCD_DisplayStringAt(138, 103, (uint8_t *)dega, LEFT_MODE);
                         wait_ms(50);
                         break;
                             
