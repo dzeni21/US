@@ -1,7 +1,6 @@
 #include "mbed.h"
  #include "stm32f413h_discovery_ts.h"
  #include "stm32f413h_discovery_lcd.h"
- //#include <iostream>
  #include <vector>
  
  TS_StateTypeDef TS_State = { 0 };
@@ -182,6 +181,17 @@ int vratiStepen(int i)
     return 0;
 }
 
+void brisiCifru(int x, int y)
+{
+    int a = 78;
+    if(x == 85 && y == 103)
+        BSP_LCD_DisplayStringAt(a + 7, 104, (uint8_t *)"-", LEFT_MODE);
+    else if(x == 109 && y == 103)
+        BSP_LCD_DisplayStringAt(a + 31, 104, (uint8_t *)"-", LEFT_MODE);
+    else 
+        BSP_LCD_DisplayStringAt(a + 60, 104, (uint8_t *)"-", LEFT_MODE);
+}
+
 std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vraca niz sa koeficijentima
 {
     std::vector<double> ret;
@@ -203,10 +213,10 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
             BSP_LCD_SetFont(&Font12);
             BSP_LCD_DisplayStringAt(175, 52, (uint8_t *)potencija, LEFT_MODE);
         }
-        
+
         BSP_TS_GetState(&TS_State);
         i = 0;
-        while(i < 3)
+        while(i < 4)
         {
             
             BSP_TS_GetState(&TS_State);
@@ -224,26 +234,58 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                     predznak = -1;
                     i--;
                 }
+                    
                 else
                 {
                     int cifra = dajCifru(x1, y1);
-                    unoseniBroj[i] = cifra;
-                    
-                    char dega[2] = {cifra + 48};
-                    
-                    BSP_LCD_SetFont(&Font16);
-                    switch(i) { //Ispis cifre na predvidjeno mjesto
-                        case 0: BSP_LCD_DisplayStringAt(85, 103, (uint8_t *)dega, LEFT_MODE); break;
-                        case 1: BSP_LCD_DisplayStringAt(109, 103, (uint8_t *)dega, LEFT_MODE); break;
-                        case 2: BSP_LCD_DisplayStringAt(138, 103, (uint8_t *)dega, LEFT_MODE);
-                        wait_ms(50);
-                        break;
-                            
-                             //Privremeno, dok ne ubacimo potvrdu sa ENTER
+
+                    if(cifra == 11 && i > 0)
+                    {
+                        i--;
+                        switch(i)
+                        {
+                            case 0:  
+                                brisiCifru(85, 103);
+                                break;
+                            case 1: 
+                                brisiCifru(109, 103);
+                                break;
+                            case 2: 
+                                brisiCifru(138, 103);
+                                break;
+                        }
+                         
                     }
-                    
+                    else if(i == 3)
+                    {
+                        while(1)//enter
+                        {
+                            if(dajCifru(x1, y1) == 10)
+                            {
+                                i++;
+                                break;
+                            }
+                        }
+                        break;
+                    }
+                    else if(cifra >= 0 && cifra <= 9)
+                    {
+                        unoseniBroj[i] = cifra;
+                        char dega[2] = {cifra + 48};
+                        
+                        BSP_LCD_SetFont(&Font16);
+                        switch(i) { //Ispis cifre na predvidjeno mjesto
+                            case 0: BSP_LCD_DisplayStringAt(85, 103, (uint8_t *)dega, LEFT_MODE); 
+                                break;
+                            case 1: BSP_LCD_DisplayStringAt(109, 103, (uint8_t *)dega, LEFT_MODE); 
+                                break;
+                            case 2: BSP_LCD_DisplayStringAt(138, 103, (uint8_t *)dega, LEFT_MODE); 
+                                break;
+                        }
+                        i++;
+                    }
                 }
-                i++;
+                
             }
         }
     
