@@ -570,11 +570,7 @@ int mqtt()
      //JOS JEDAN DIJAGRAM
      int a = OdabirDijagrama();
      printf("Odabran je: %d \n", a);
-     for(int i = 0; i < StepenBrojnika; i++)
-        printf("%.1f\n", nizNula[i]);
-     printf("Koeficijenti nazivnika: \n");
-     for(int i = 0; i < StepenNazivnika; i++)
-        printf("%.1f\n", nizPolova[i]);
+
     printf("\n\n\n\n\n\n\n\n\n");
     int r = mqtt();
      wait(1);
