@@ -1,4 +1,4 @@
-#include "mbed.h"
+ #include "mbed.h"
  #include "stm32f413h_discovery_ts.h"
  #include "stm32f413h_discovery_lcd.h"
  #include <vector>
@@ -200,7 +200,7 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
     int stepen = vratiStepen(T);
     double coef;
     BSP_TS_GetState(&TS_State);
-    while (brojac < stepen) 
+    while (brojac < stepen + 1) 
     {
         
         CrtajOkvirove(T);
@@ -229,10 +229,17 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                 if(x1 >= 5 && x1 <= 30 && y1 >= 215 && y1 <= 240) //unos -
                 {   
                     BSP_LCD_SetFont(&Font12);
-                    BSP_LCD_DisplayStringAt(70, 105, (uint8_t *)"-", LEFT_MODE);//ispisi minus na displej
+                    if(predznak == 1)
+                    {
+                        predznak = -1;
+                        BSP_LCD_DisplayStringAt(70, 105, (uint8_t *)"-", LEFT_MODE);
+                    }
+                    else
+                    {
+                        predznak = 1;
+                        BSP_LCD_DisplayStringAt(70, 105, (uint8_t *)" ", LEFT_MODE);
+                    }
                     
-                    predznak = -1;
-                    i--;
                 }
                     
                 else
@@ -271,15 +278,15 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                     else if(cifra >= 0 && cifra <= 9)
                     {
                         unoseniBroj[i] = cifra;
-                        char dega[2] = {cifra + 48};
+                        char num[2] = {cifra + 48};
                         
                         BSP_LCD_SetFont(&Font16);
                         switch(i) { //Ispis cifre na predvidjeno mjesto
-                            case 0: BSP_LCD_DisplayStringAt(85, 103, (uint8_t *)dega, LEFT_MODE); 
+                            case 0: BSP_LCD_DisplayStringAt(85, 103, (uint8_t *)num, LEFT_MODE); 
                                 break;
-                            case 1: BSP_LCD_DisplayStringAt(109, 103, (uint8_t *)dega, LEFT_MODE); 
+                            case 1: BSP_LCD_DisplayStringAt(109, 103, (uint8_t *)num, LEFT_MODE); 
                                 break;
-                            case 2: BSP_LCD_DisplayStringAt(138, 103, (uint8_t *)dega, LEFT_MODE); 
+                            case 2: BSP_LCD_DisplayStringAt(138, 103, (uint8_t *)num, LEFT_MODE); 
                                 break;
                         }
                         i++;
@@ -304,6 +311,91 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
     return ret;
 }
 
+void BrojUString(char* broj, double num) {
+    if(num < 0) {
+        broj[0] = '-';
+        num *= -1;
+    }
+    else broj[0] = '+';
+    printf("Broj: %.2f\n", num);
+    int pomocnibroj = num*10;
+    int decimala = pomocnibroj%10;
+    
+  
+    if(num > 9.9) {
+        broj[1] = int(num/10) + '0'; num -= int(num/10)*10;
+        broj[2] = int(num) + '0'; broj[3] = '.'; broj[4] = decimala + '0';
+        broj[5] = '\0'; 
+    } else if(num < 1) {
+        broj[1] = '0'; broj[2] = '.'; 
+        broj[3] = decimala + '0';
+        broj[4] = '0'; 
+        broj[5] = '\0';
+    } else {
+        broj[1] = int(num) + '0'; broj[2] = '.'; 
+        broj[3] = decimala + '0';
+        broj[4] = '0'; broj[5] = '\0'; 
+    }
+}
+
+void IspisiBrojnikINazivnik(int y, int a) {
+    std::vector<double> niz;
+    if(y == 82) niz = nizNula;
+    else niz = nizPolova;
+    int step = niz.size();
+    BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+    
+    for(int i = 0; i < step; i++) {
+        BSP_LCD_SetFont(&Font12);
+        char broj[7];
+        BrojUString(broj, niz.at(step - 1 - i));
+        if(i == 0 && niz.at(step - 1 - i)>0) broj[0] = ' ';
+        BSP_LCD_DisplayStringAt( a + i*45 , y, (uint8_t *) broj, LEFT_MODE);
+        if(i < step- 1) {
+            char pomocnistring[2];
+            pomocnistring[0] = 's';
+            pomocnistring[1] = '\0';
+            
+            BSP_LCD_DisplayStringAt( a + i*45 + 35, y, (uint8_t *) pomocnistring, LEFT_MODE);
+            
+            
+            BSP_LCD_SetFont(&Font8);
+            if(i < step - 2) {
+                pomocnistring[0] = step - i - 1 + '0';
+                pomocnistring[1] = '\0';
+                BSP_LCD_DisplayStringAt( a + i*45 + 42, y-6, (uint8_t *) pomocnistring, LEFT_MODE);
+            }
+             
+        } 
+        
+    }
+    
+    
+    
+}
+
+
+void IspisiPrenosnuFunkciju() {
+
+     int koefsirina;
+     if(nizNula.size() > nizPolova.size()) koefsirina = nizNula.size();
+     else koefsirina = nizPolova.size();
+     BSP_LCD_Clear(LCD_COLOR_WHITE);
+     BSP_LCD_SetTextColor(6591981);
+     BSP_LCD_FillRect(0, 0, BSP_LCD_GetXSize(), 40);
+     BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+     BSP_LCD_SetBackColor(6591981);
+     BSP_LCD_SetFont(&Font24);
+     BSP_LCD_DisplayStringAt(0, 8, (uint8_t *)"G(s)= ", LEFT_MODE);
+     crtajTastaturu();
+     BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
+     BSP_LCD_SetFont(&Font12);
+     BSP_LCD_DrawHLine((BSP_LCD_GetXSize() - koefsirina*42)/2, 96, koefsirina*42 );
+
+     IspisiBrojnikINazivnik(82,  (BSP_LCD_GetXSize() -  nizNula.size()*42)/2 - 8);
+     IspisiBrojnikINazivnik(105,  (BSP_LCD_GetXSize() -  nizPolova.size()*42)/2 - 8);
+     
+} 
 
  int main()
  {
@@ -321,7 +413,7 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
      nizNula = koeficijenti(0);
      ispisPoloviTekst();
      nizPolova = koeficijenti(1);
-     
+     IspisiPrenosnuFunkciju();
      printf("Koeficijenti brojnika: \n");
      for(int i = 0; i < StepenBrojnika; i++)
         printf("%.1f\n", nizNula[i]);
