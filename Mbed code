@@ -7,8 +7,6 @@
  #include "MQTTmbed.h"
  #include "MQTTClient.h"
  #include <string>
- #include <algorithm>
-// #include <iterator>
  #include <sstream>
 
  #define TEMAPUBBROJNIK "ugradbeni/brojnik"
@@ -515,7 +513,7 @@ int mqtt()
             
             //koeficijenti brojnika
             std::ostringstream vts;
-            char char_array[60], char_array1[60];
+            char char_arrayNula[60], char_arrayPolova[60];
   
              if (!nizNula.empty())
             {
@@ -524,30 +522,29 @@ int mqtt()
                 vts << nizNula.back();
                 std::string stringNula = vts.str();
                 int n = stringNula.length();
-                strcpy(char_array, stringNula.c_str());
+                strcpy(char_arrayNula, stringNula.c_str());
                 message.qos = MQTT::QOS0;
                 message.retained = false;
                 message.dup = false;
-                message.payload = (void*)char_array;
-                message.payloadlen = strlen(char_array);
+                message.payload = (void*)char_arrayNula;
+                message.payloadlen = strlen(char_arrayNula);
                 rc = client.publish(TEMAPUBBROJNIK, message);
             }
             //koeficijenti nazivnika
             std::ostringstream vts1;
-  
-             if (!nizPolova.empty())
+            if (!nizPolova.empty())
             {
                 std::copy(nizPolova.begin(), nizPolova.end()-1,
                 std::ostream_iterator<double>(vts1, ","));
                 vts1 << nizPolova.back();
                 std::string stringPolova= vts1.str();
                 int n1 = stringPolova.length();
-                strcpy(char_array1, stringPolova.c_str());
+                strcpy(char_arrayPolova, stringPolova.c_str());
                 message.qos = MQTT::QOS0;
                 message.retained = false;
                 message.dup = false;
-                message.payload = (void*)char_array1;
-                message.payloadlen = strlen(char_array1);
+                message.payload = (void*)char_arrayPolova;
+                message.payloadlen = strlen(char_arrayPolova);
                 rc = client.publish(TEMAPUBNAZIVNIK, message);
             }
             //odabir grafa
