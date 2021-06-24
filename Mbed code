@@ -12,7 +12,7 @@
  #define TEMAPUBBROJNIK "ugradbeni/brojnik"
  #define TEMAPUBNAZIVNIK "ugradbeni/nazivnik"
  #define TEMAPUBGRAF "ugradbeni/brojGrafa"
- #define TEMAPUBTEST "ugradbeni/test"
+
 
  #define MQTTCLIENT_QOS2 0
  
@@ -310,10 +310,8 @@ std::vector<double> koeficijenti(int T) //funkcija za unos koeficijenata -> vrac
                         i++;
                     }
                 }
-                
             }
         }
-    
         coef = dajBroj(unoseniBroj);
         //ret[brojac] = coef * predznak;
         ret.push_back(coef * predznak);
@@ -383,15 +381,9 @@ void IspisiBrojnikINazivnik(int y, int a) {
                 pomocnistring[1] = '\0';
                 BSP_LCD_DisplayStringAt( a + i*45 + 42, y-6, (uint8_t *) pomocnistring, LEFT_MODE);
             }
-             
         } 
-        
     }
-    
-    
-    
 }
-
 
 void IspisiPrenosnuFunkciju() {
 
@@ -426,7 +418,7 @@ int OdabirDijagrama() {
      BSP_LCD_DisplayStringAt(0, 23, (uint8_t *)"za prikaz: ", LEFT_MODE);
      crtajTastaturu();
      
-     int odabir = 0; 
+     int odabir = 1; 
      
      
      BSP_LCD_DrawRect(80, 45, 80, 30);
@@ -443,15 +435,15 @@ int OdabirDijagrama() {
      BSP_TS_GetState(&TS_State);
      
      while(1) {
-         if(odabir == 0) {
+         if(odabir == 1) {
              BSP_LCD_DisplayStringAt(40, 123, (uint8_t *) "    ", LEFT_MODE);
              BSP_LCD_DisplayStringAt(40, 55, (uint8_t *) "--->", LEFT_MODE);
          }
-         if(odabir == 1) {
+         if(odabir == 2) {
              BSP_LCD_DisplayStringAt(40, 55, (uint8_t *) "    ", LEFT_MODE);
              BSP_LCD_DisplayStringAt(40, 90, (uint8_t *) "--->", LEFT_MODE);
          }
-         if(odabir == 2) {
+         if(odabir == 3) {
              BSP_LCD_DisplayStringAt(40, 90, (uint8_t *) "    ", LEFT_MODE);
              BSP_LCD_DisplayStringAt(40, 123, (uint8_t *) "--->", LEFT_MODE);
          }
@@ -465,17 +457,16 @@ int OdabirDijagrama() {
             
 
             if(dajCifru(x1, y1) == 12) {
-                if(odabir == 2) odabir = 0;
+                if(odabir == 3) odabir = 1;
                 else odabir++;
              }
-            
          }
         
          wait_ms(200);
      }
      BSP_LCD_DisplayStringAt(40, 55, (uint8_t *) "--->", LEFT_MODE);
      BSP_LCD_DisplayStringAt(170, 55, (uint8_t *) "<---", LEFT_MODE);
-    return 0;
+    return odabir;
 }
 
 int mqtt()
@@ -510,12 +501,11 @@ int mqtt()
         printf("rc from MQTT connect is %d\r\n", rc);
 
     MQTT::Message message;
-            
             //koeficijenti brojnika
             std::ostringstream vts;
             char char_arrayNula[60], char_arrayPolova[60];
   
-             if (!nizNula.empty())
+            if (!nizNula.empty())
             {
                 std::copy(nizNula.begin(), nizNula.end()-1,
                 std::ostream_iterator<double>(vts, ","));
@@ -548,6 +538,18 @@ int mqtt()
                 rc = client.publish(TEMAPUBNAZIVNIK, message);
             }
             //odabir grafa
+            int opcija = OdabirDijagrama();
+            char buf[100];
+            if (opcija)
+            {
+                sprintf(buf, "{\"Odabir grafa\": %d}", opcija);
+                message.qos = MQTT::QOS0;
+                message.retained = false;
+                message.dup = false;
+                message.payload = (void*)buf;
+                message.payloadlen = strlen(buf);
+                rc = client.publish(TEMAPUBGRAF, message);
+            }
 }
 
  int main()
