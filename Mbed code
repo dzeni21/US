@@ -501,19 +501,8 @@ int mqtt(int opcijaGrafa)
         printf("rc from MQTT connect is %d\r\n", rc);
 
     MQTT::Message message;
-            //odabir grafa
-            char buf[100];
-            if (opcijaGrafa)
-            {
-                printf("TEST: %d\n", opcijaGrafa);
-                sprintf(buf, "{\"Odabir grafa\": %d}", opcijaGrafa);
-                message.qos = MQTT::QOS0;
-                message.retained = false;
-                message.dup = false;
-                message.payload = (void*)buf;
-                message.payloadlen = strlen(buf);
-                rc = client.publish(TEMAPUBGRAF, message);
-            }
+
+
             //koeficijenti brojnika
             std::ostringstream vts;
             char char_arrayNula[60], char_arrayPolova[60];
@@ -550,11 +539,25 @@ int mqtt(int opcijaGrafa)
                 message.payloadlen = strlen(char_arrayPolova);
                 rc = client.publish(TEMAPUBNAZIVNIK, message);
             }
+            //odabir grafa
+            char buf[100];
+            if (opcijaGrafa)
+            {
+                printf("TEST: %d\n", opcijaGrafa);
+                sprintf(buf, "%d", opcijaGrafa);
+                message.qos = MQTT::QOS0;
+                message.retained = false;
+                message.dup = false;
+                message.payload = (void*)buf;
+                message.payloadlen = strlen(buf);
+                rc = client.publish(TEMAPUBGRAF, message);
+            }
 
 }
 
  int main()
  {
+     while(1){
      BSP_LCD_Init();
      //
      /* inicijalizacija ekrana */
@@ -594,5 +597,6 @@ int mqtt(int opcijaGrafa)
         printf("%.1f\n", nizPolova[i]);
     printf("\n\n\n\n\n\n\n\n\n");
     int r = mqtt(a);
-     wait(1);
+     wait(3);
+    }
  }
