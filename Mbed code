@@ -469,7 +469,7 @@ int OdabirDijagrama() {
     return odabir;
 }
 
-int mqtt()
+int mqtt(int opcijaGrafa)
 {
     printf("Ugradbeni sistemi\r\n");
     printf("Demonstracija korištenja MQTT protokola\r\n\r\n");
@@ -501,6 +501,19 @@ int mqtt()
         printf("rc from MQTT connect is %d\r\n", rc);
 
     MQTT::Message message;
+            //odabir grafa
+            char buf[100];
+            if (opcijaGrafa)
+            {
+                printf("TEST: %d\n", opcijaGrafa);
+                sprintf(buf, "{\"Odabir grafa\": %d}", opcijaGrafa);
+                message.qos = MQTT::QOS0;
+                message.retained = false;
+                message.dup = false;
+                message.payload = (void*)buf;
+                message.payloadlen = strlen(buf);
+                rc = client.publish(TEMAPUBGRAF, message);
+            }
             //koeficijenti brojnika
             std::ostringstream vts;
             char char_arrayNula[60], char_arrayPolova[60];
@@ -537,19 +550,7 @@ int mqtt()
                 message.payloadlen = strlen(char_arrayPolova);
                 rc = client.publish(TEMAPUBNAZIVNIK, message);
             }
-            //odabir grafa
-            int opcija = OdabirDijagrama();
-            char buf[100];
-            if (opcija)
-            {
-                sprintf(buf, "{\"Odabir grafa\": %d}", opcija);
-                message.qos = MQTT::QOS0;
-                message.retained = false;
-                message.dup = false;
-                message.payload = (void*)buf;
-                message.payloadlen = strlen(buf);
-                rc = client.publish(TEMAPUBGRAF, message);
-            }
+
 }
 
  int main()
@@ -592,6 +593,6 @@ int mqtt()
      for(int i = 0; i < StepenNazivnika; i++)
         printf("%.1f\n", nizPolova[i]);
     printf("\n\n\n\n\n\n\n\n\n");
-    int r = mqtt();
+    int r = mqtt(a);
      wait(1);
  }
